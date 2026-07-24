@@ -315,13 +315,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* time controls: slim vertical rail on mobile, horizontal pill on desktop */}
-      <div className={`absolute right-2 top-1/2 flex max-h-[92vh] -translate-y-1/2 flex-col items-center gap-1 overflow-y-auto rounded-full border border-white/10 bg-black/55 p-1.5 backdrop-blur-md transition-transform duration-300 md:bottom-6 md:left-1/2 md:right-auto md:top-auto md:max-h-none md:-translate-x-1/2 md:translate-y-0 md:flex-row md:overflow-visible md:pl-2 ${railOpen ? 'translate-x-0' : 'translate-x-[calc(100%+1rem)]'}`}>
+      {/* time controls: slim vertical rail on mobile/tablet, horizontal pill on wide desktop */}
+      <div className={`absolute right-2 top-1/2 flex max-h-[92vh] -translate-y-1/2 flex-col items-center gap-1 overflow-y-auto rounded-full border border-white/10 bg-black/55 p-1.5 backdrop-blur-md transition-transform duration-300 lg:bottom-6 lg:left-1/2 lg:right-auto lg:top-auto lg:max-h-none lg:-translate-x-1/2 lg:translate-y-0 lg:flex-row lg:overflow-visible lg:pl-2 ${railOpen ? 'translate-x-0' : 'translate-x-[calc(100%+1rem)]'}`}>
         {/* collapse toggle */}
         <button
           onClick={() => setRailOpen(false)}
           title="Hide controls"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-cyan-300/70 transition-colors hover:bg-cyan-400/15 hover:text-cyan-300 md:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-cyan-300/70 transition-colors hover:bg-cyan-400/15 hover:text-cyan-300 lg:hidden"
         >
           <ChevronRight size={18} />
         </button>
@@ -329,7 +329,7 @@ export default function Home() {
         <button
           onClick={togglePause}
           title={paused ? 'Resume' : 'Pause'}
-          className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:h-8 md:w-8 ${
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-all lg:h-8 lg:w-8 ${
             paused
               ? 'bg-cyan-400 text-black shadow-[0_0_12px_rgba(34,211,238,0.5)]'
               : 'text-white/80 hover:bg-white/10'
@@ -338,14 +338,14 @@ export default function Home() {
           {paused ? <Play size={16} className="ml-0.5" fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
         </button>
 
-        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
+        <div className="my-1 h-px w-5 bg-white/10 lg:mx-1 lg:my-0 lg:h-5 lg:w-px" />
 
         {/* rate presets */}
         {RATES.map((r) => (
           <button
             key={r}
             onClick={() => applyRate(r)}
-            className={`rounded-full px-1.5 py-1 font-mono text-[11px] transition-colors md:px-3 md:py-1 md:text-xs ${
+            className={`rounded-full px-1.5 py-1 font-mono text-[11px] transition-colors lg:px-3 lg:py-1 lg:text-xs ${
               !paused && rate === r ? 'bg-cyan-400/25 text-cyan-300' : 'text-white/55 hover:bg-white/10'
             }`}
           >
@@ -357,21 +357,21 @@ export default function Home() {
         <button
           onClick={resetTime}
           title="Reset to current time"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white md:h-8 md:w-8"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white lg:h-8 lg:w-8"
         >
           <RotateCcw size={14} />
         </button>
 
-        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
+        <div className="my-1 h-px w-5 bg-white/10 lg:mx-1 lg:my-0 lg:h-5 lg:w-px" />
 
         {/* camera auto-rotate */}
-        <div className="flex flex-col items-center gap-1 rounded-full bg-white/5 p-0.5 md:flex-row" title="Camera auto-rotate">
-          <Orbit size={13} className="my-1 text-white/40 md:mx-1.5 md:my-0" />
+        <div className="flex flex-col items-center gap-1 rounded-full bg-white/5 p-0.5 lg:flex-row" title="Camera auto-rotate">
+          <Orbit size={13} className="my-1 text-white/40 lg:mx-1.5 lg:my-0" />
           {SPINS.map((s) => (
             <button
               key={s.label}
               onClick={() => setSpin(s.value)}
-              className={`rounded-full px-1.5 py-1 text-[9px] font-medium uppercase tracking-wide transition-colors md:px-2.5 md:py-1 md:text-[10px] ${
+              className={`rounded-full px-1.5 py-1 text-[9px] font-medium uppercase tracking-wide transition-colors lg:px-2.5 lg:py-1 lg:text-[10px] ${
                 spin === s.value ? 'bg-cyan-400/25 text-cyan-300' : 'text-white/45 hover:bg-white/10'
               }`}
             >
@@ -380,13 +380,13 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
+        <div className="my-1 h-px w-5 bg-white/10 lg:mx-1 lg:my-0 lg:h-5 lg:w-px" />
 
         {/* starfield toggle */}
         <button
           onClick={() => setStarsVisible((v) => !v)}
           title={starsVisible ? 'Hide background stars' : 'Show background stars'}
-          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-8 md:w-8 ${
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors lg:h-8 lg:w-8 ${
             starsVisible ? 'text-cyan-300 hover:bg-white/10' : 'text-white/40 hover:bg-white/10'
           }`}
         >
@@ -476,8 +476,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* hint (xl only — would collide with the centered control pill below that) */}
-      <div className="pointer-events-none absolute bottom-6 right-5 hidden text-right text-[10px] uppercase tracking-widest text-white/25 xl:block">
+      {/* hint (2xl only — needs the horizontal pill + wide margins to fit) */}
+      <div className="pointer-events-none absolute bottom-6 right-5 hidden text-right text-[10px] uppercase tracking-widest text-white/25 2xl:block">
         drag · rotate&nbsp;&nbsp;scroll · zoom&nbsp;&nbsp;click · track
       </div>
 
