@@ -215,7 +215,7 @@ export default function Home() {
           <button
             onClick={() => setHeaderOpen((o) => !o)}
             aria-label="Toggle header details"
-            className="rounded-full border border-white/10 bg-black/40 p-1 text-white/50 backdrop-blur-md md:hidden"
+            className="rounded-full border border-white/10 bg-black/40 p-1 text-cyan-300 backdrop-blur-md transition-colors hover:bg-cyan-400/15 md:hidden"
           >
             {headerOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
