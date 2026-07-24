@@ -197,7 +197,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black font-sans text-white">
+    <div className="relative h-dvh w-screen overflow-hidden bg-black font-sans text-white">
       <div ref={mountRef} className="absolute inset-0" />
 
       {/* vignette */}
@@ -250,12 +250,16 @@ export default function Home() {
       </div>
 
       {/* search: bottom-right, lined up in the footer row */}
-      <div className="absolute bottom-3 right-3 w-40 md:bottom-6 md:right-5 md:w-64">
+      <div
+        className="absolute right-2.5 w-40 md:bottom-6 md:right-5 md:w-64"
+        style={{ bottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name or NORAD ID…"
-          className="w-full rounded-md border border-white/15 bg-black/60 px-3 py-2 text-sm text-white placeholder-white/30 outline-none backdrop-blur-md focus:border-cyan-400/60"
+          className="w-full rounded-md border border-white/15 bg-black/60 px-2.5 py-1.5 text-sm text-white placeholder-white/30 outline-none backdrop-blur-md focus:border-cyan-400/60 md:px-3 md:py-2"
+          style={{ fontSize: '16px' }}
         />
         {results.length > 0 && (
           <div className="absolute bottom-full right-0 mb-1 max-h-72 w-full overflow-y-auto rounded-md border border-white/10 bg-black/80 backdrop-blur-md">
@@ -279,15 +283,18 @@ export default function Home() {
       </div>
 
       {/* legend: bottom-left on both, collapsed by default on mobile */}
-      <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/55 p-3 backdrop-blur-md md:bottom-24 md:left-5">
+      <div
+        className="absolute left-2.5 max-w-[46vw] rounded-lg border border-white/10 bg-black/55 p-2.5 backdrop-blur-md md:bottom-24 md:left-5 md:max-w-none md:p-3"
+        style={{ bottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <button
           onClick={() => setLegendOpen((o) => !o)}
-          className={`flex w-full items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 ${legendOpen ? 'mb-2' : ''}`}
+          className={`flex w-full items-center justify-between gap-2 whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40 md:gap-3 md:text-[10px] ${legendOpen ? 'mb-2' : ''}`}
         >
           Constellations
           {legendOpen ? <ChevronUp size={12} className="text-cyan-300" /> : <ChevronDown size={12} className="text-cyan-300" />}
         </button>
-        <div className={`${legendOpen ? 'grid' : 'hidden'} grid-cols-1 gap-x-5 gap-y-1.5 md:grid-cols-2`}>
+        <div className={`${legendOpen ? 'grid' : 'hidden'} max-h-[38vh] grid-cols-1 gap-x-5 gap-y-1.5 overflow-y-auto md:max-h-none md:grid-cols-2 md:overflow-visible`}>
           {ALL_CATS.map((c) => {
             const active = cats.has(c)
             return (
@@ -401,7 +408,7 @@ export default function Home() {
 
       {/* selected satellite panel */}
       {selected && (
-        <div className="absolute bottom-20 left-3 right-3 max-h-[42vh] w-auto overflow-y-auto rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-md md:bottom-24 md:left-auto md:right-5 md:max-h-none md:w-72 md:overflow-visible">
+        <div className="absolute bottom-24 left-3 right-3 max-h-[42vh] w-auto overflow-y-auto rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-md md:bottom-24 md:left-auto md:right-5 md:max-h-none md:w-72 md:overflow-visible">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm font-semibold text-white/95">{selected.name}</div>
