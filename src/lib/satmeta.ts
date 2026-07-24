@@ -58,12 +58,22 @@ function resolveTitle(name: string): string {
   return cleanName(name)
 }
 
+// a summary is only accepted if it's clearly about a space object —
+// prevents showing unrelated articles (weapons, people, ...) for obscure names
+const SPACE_TERMS = /satellite|spacecraft|space station|space telescope|orbit|rocket|NASA|ESA|constellation/i
+
+function isSpaceRelated(j: { title?: string; description?: string; extract?: string }): boolean {
+  const text = `${j.title ?? ''} ${j.description ?? ''} ${(j.extract ?? '').slice(0, 300)}`
+  return SPACE_TERMS.test(text)
+}
+
 async function fetchSummary(title: string): Promise<SatMeta | null> {
   const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
   const res = await fetch(url)
   if (!res.ok) return null
   const j = await res.json()
   if (j.type === 'disambiguation' || !j.content_urls) return null
+  if (!isSpaceRelated(j)) return null
   return {
     title: j.title ?? title,
     description: j.description,
@@ -77,23 +87,9 @@ export async function getSatMeta(name: string): Promise<SatMeta | null> {
   const key = name.toUpperCase()
   if (cache.has(key)) return cache.get(key) ?? null
 
-  const title = resolveTitle(name)
-  let meta = await fetchSummary(title).catch(() => null)
-
-  // fallback: open search on the cleaned name
-  if (!meta) {
-    try {
-      const q = encodeURIComponent(cleanName(name))
-      const res = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=opensearch&search=${q}&limit=1&namespace=0&format=json&origin=*`,
-      )
-      const j = await res.json()
-      const hit: string | undefined = j?.[1]?.[0]
-      if (hit) meta = await fetchSummary(hit).catch(() => null)
-    } catch {
-      /* ignore */
-    }
-  }
+  // only curated exact/constellation matches are looked up — never an open
+  // search, so an obscure name can never surface an unrelated article/image
+  const meta = await fetchSummary(resolveTitle(name)).catch(() => null)
 
   cache.set(key, meta)
   return meta

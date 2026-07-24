@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Play, Pause, RotateCcw, Orbit, ExternalLink, Loader2, Sparkles, Sparkle, ChevronDown, ChevronUp, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Play, Pause, RotateCcw, Orbit, ExternalLink, Loader2, Sparkles, Sparkle, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Satellite } from 'lucide-react'
 import { GlobeScene, type SelectionInfo } from '@/lib/globe'
 import { getSatMeta, type SatMeta } from '@/lib/satmeta'
 import { fetchLive, fetchSnapshot, CATEGORY_META, type SatRecord, type Category, type TLESource } from '@/lib/tle'
@@ -249,9 +249,9 @@ export default function Home() {
         )}
       </div>
 
-      {/* search: bottom-right, lined up in the footer row */}
+      {/* search: bottom-right on phone, top-right on tablet+ (never overlaps footer text) */}
       <div
-        className="absolute right-2.5 w-40 md:bottom-6 md:right-5 md:w-64"
+        className="absolute right-2.5 w-40 md:top-5 md:right-5 md:w-64"
         style={{ bottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <input
@@ -262,7 +262,7 @@ export default function Home() {
           style={{ fontSize: '16px' }}
         />
         {results.length > 0 && (
-          <div className="absolute bottom-full right-0 mb-1 max-h-72 w-full overflow-y-auto rounded-md border border-white/10 bg-black/80 backdrop-blur-md">
+          <div className="absolute bottom-full right-0 mb-1 max-h-72 w-full overflow-y-auto rounded-md border border-white/10 bg-black/80 backdrop-blur-md md:bottom-auto md:top-full md:mb-0 md:mt-1">
             {results.map((r) => (
               <button
                 key={r.noradId}
@@ -432,15 +432,20 @@ export default function Home() {
           )}
           {meta && !metaLoading && (
             <div className="mt-3">
-              {meta.imageUrl && (
+              {meta.imageUrl ? (
                 <a href={meta.pageUrl} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-md border border-white/10">
                   <img
                     src={meta.imageUrl}
                     alt={meta.title}
                     className="h-32 w-full object-cover transition-transform duration-300 hover:scale-105"
                     loading="lazy"
+                    onError={(e) => { (e.target as HTMLImageElement).closest('a')!.style.display = 'none' }}
                   />
                 </a>
+              ) : (
+                <div className="flex h-20 items-center justify-center rounded-md border border-white/10 bg-white/[0.03]">
+                  <Satellite size={28} className="text-cyan-400/50" />
+                </div>
               )}
               <a
                 href={meta.pageUrl}
@@ -452,6 +457,11 @@ export default function Home() {
                 {meta.title}
                 {meta.description ? <span className="text-white/40">· {meta.description}</span> : null}
               </a>
+            </div>
+          )}
+          {!meta && !metaLoading && (
+            <div className="mt-3 flex h-20 items-center justify-center rounded-md border border-white/10 bg-white/[0.03]">
+              <Satellite size={28} className="text-cyan-400/50" />
             </div>
           )}
           {selInfo && (

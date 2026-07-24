@@ -96,8 +96,40 @@ export interface TLESource {
   fetchedAt: Date
 }
 
-/** Live CelesTrak fetch (CORS enabled, server updates every ~2h). Returns null on failure. */
+const LIVE_CACHE_KEY = 'orbitlive-tle-cache'
+const LIVE_CACHE_TTL = 2 * 60 * 60 * 1000 // CelesTrak only updates ~every 2h
+
+interface TLECache {
+  text: string
+  fetchedAt: number
+}
+
+function readLiveCache(): TLESource | null {
+  try {
+    const raw = localStorage.getItem(LIVE_CACHE_KEY)
+    if (!raw) return null
+    const c: TLECache = JSON.parse(raw)
+    const records = parseTLE(c.text)
+    if (records.length < 100) return null
+    return { records, source: 'celestrak', fetchedAt: new Date(c.fetchedAt) }
+  } catch {
+    return null
+  }
+}
+
+/** Live CelesTrak fetch, cached for 2h to respect rate limits. Returns null on failure. */
 export async function fetchLive(): Promise<TLESource | null> {
+  // serve from cache if fresh
+  try {
+    const raw = localStorage.getItem(LIVE_CACHE_KEY)
+    if (raw) {
+      const c: TLECache = JSON.parse(raw)
+      if (Date.now() - c.fetchedAt < LIVE_CACHE_TTL) return readLiveCache()
+    }
+  } catch {
+    /* ignore */
+  }
+
   try {
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), 8000)
@@ -107,13 +139,20 @@ export async function fetchLive(): Promise<TLESource | null> {
       const text = await res.text()
       const records = parseTLE(text)
       if (records.length > 100) {
+        try {
+          localStorage.setItem(LIVE_CACHE_KEY, JSON.stringify({ text, fetchedAt: Date.now() }))
+        } catch {
+          /* quota exceeded — ignore */
+        }
         return { records, source: 'celestrak', fetchedAt: new Date() }
       }
     }
   } catch {
     /* offline or blocked */
   }
-  return null
+
+  // rate-limited or offline — fall back to a stale cache before giving up
+  return readLiveCache()
 }
 
 /** Bundled snapshot — instant, always available. */
