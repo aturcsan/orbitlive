@@ -209,6 +209,9 @@ export default function Home() {
           <h1 className="text-lg font-bold tracking-[0.25em] text-white/95 md:text-2xl">
             ORBIT<span className="text-cyan-400">LIVE</span>
           </h1>
+          <span className="rounded-full border border-cyan-400/30 px-1.5 py-0.5 font-mono text-[9px] text-cyan-300/70">
+            v1.1
+          </span>
           <button
             onClick={() => setHeaderOpen((o) => !o)}
             aria-label="Toggle header details"
