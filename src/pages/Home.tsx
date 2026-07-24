@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Play, Pause, RotateCcw, Orbit, ExternalLink, Loader2, Sparkles, Sparkle } from 'lucide-react'
+import { Play, Pause, RotateCcw, Orbit, ExternalLink, Loader2, Sparkles, Sparkle, ChevronDown, ChevronUp, ChevronRight, ChevronLeft } from 'lucide-react'
 import { GlobeScene, type SelectionInfo } from '@/lib/globe'
 import { getSatMeta, type SatMeta } from '@/lib/satmeta'
 import { fetchLive, fetchSnapshot, CATEGORY_META, type SatRecord, type Category, type TLESource } from '@/lib/tle'
@@ -44,6 +44,9 @@ export default function Home() {
   const [starsVisible, setStarsVisible] = useState(true)
   const [meta, setMeta] = useState<SatMeta | null>(null)
   const [metaLoading, setMetaLoading] = useState(false)
+  const [headerOpen, setHeaderOpen] = useState(false)
+  const [legendOpen, setLegendOpen] = useState(() => window.matchMedia('(min-width: 768px)').matches)
+  const [railOpen, setRailOpen] = useState(true)
   const deepLinkApplied = useRef(false)
 
   const applyData = (scene: GlobeScene, t: TLESource) => {
@@ -201,14 +204,23 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)' }} />
 
       {/* header */}
-      <div className="absolute left-5 top-5 select-none">
-        <h1 className="text-2xl font-bold tracking-[0.25em] text-white/95">
-          ORBIT<span className="text-cyan-400">LIVE</span>
-        </h1>
-        <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-white/40">
+      <div className="absolute left-4 top-4 select-none md:left-5 md:top-5">
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg font-bold tracking-[0.25em] text-white/95 md:text-2xl">
+            ORBIT<span className="text-cyan-400">LIVE</span>
+          </h1>
+          <button
+            onClick={() => setHeaderOpen((o) => !o)}
+            aria-label="Toggle header details"
+            className="rounded-full border border-white/10 bg-black/40 p-1 text-white/50 backdrop-blur-md md:hidden"
+          >
+            {headerOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+        </div>
+        <p className={`mt-1 text-[11px] uppercase tracking-[0.2em] text-white/40 ${headerOpen ? 'block' : 'hidden'} md:block`}>
           Real-time SGP4 constellation tracker
         </p>
-        <div className="mt-3 font-mono text-lg tabular-nums text-cyan-300/90">{clock}</div>
+        <div className="mt-2 font-mono text-sm tabular-nums text-cyan-300/90 md:mt-3 md:text-lg">{clock}</div>
         <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] text-white/45">
           {paused ? (
             <>
@@ -228,14 +240,14 @@ export default function Home() {
           )}
         </div>
         {tle && (
-          <div className="mt-1 font-mono text-[10px] text-white/30">
+          <div className={`mt-1 font-mono text-[10px] text-white/30 ${headerOpen ? 'block' : 'hidden'} md:block`}>
             TLE: {tle.source === 'celestrak' ? 'CelesTrak live' : 'bundled snapshot'} · propagated locally in browser
           </div>
         )}
       </div>
 
-      {/* search */}
-      <div className="absolute right-5 top-5 w-64">
+      {/* search: bottom-right, lined up in the footer row */}
+      <div className="absolute bottom-3 right-3 w-40 md:bottom-6 md:right-5 md:w-64">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -243,7 +255,7 @@ export default function Home() {
           className="w-full rounded-md border border-white/15 bg-black/60 px-3 py-2 text-sm text-white placeholder-white/30 outline-none backdrop-blur-md focus:border-cyan-400/60"
         />
         {results.length > 0 && (
-          <div className="mt-1 max-h-72 overflow-y-auto rounded-md border border-white/10 bg-black/80 backdrop-blur-md">
+          <div className="absolute bottom-full right-0 mb-1 max-h-72 w-full overflow-y-auto rounded-md border border-white/10 bg-black/80 backdrop-blur-md">
             {results.map((r) => (
               <button
                 key={r.noradId}
@@ -263,10 +275,16 @@ export default function Home() {
         )}
       </div>
 
-      {/* legend */}
-      <div className="absolute bottom-24 left-5 rounded-lg border border-white/10 bg-black/55 p-3 backdrop-blur-md">
-        <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Constellations</div>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-1.5">
+      {/* legend: bottom-left on both, collapsed by default on mobile */}
+      <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/55 p-3 backdrop-blur-md md:bottom-24 md:left-5">
+        <button
+          onClick={() => setLegendOpen((o) => !o)}
+          className={`flex w-full items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 ${legendOpen ? 'mb-2' : ''}`}
+        >
+          Constellations
+          {legendOpen ? <ChevronUp size={12} className="text-cyan-300" /> : <ChevronDown size={12} className="text-cyan-300" />}
+        </button>
+        <div className={`${legendOpen ? 'grid' : 'hidden'} grid-cols-1 gap-x-5 gap-y-1.5 md:grid-cols-2`}>
           {ALL_CATS.map((c) => {
             const active = cats.has(c)
             return (
@@ -287,29 +305,37 @@ export default function Home() {
         </div>
       </div>
 
-      {/* time controls */}
-      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-black/55 p-1.5 pl-2 backdrop-blur-md">
+      {/* time controls: slim vertical rail on mobile, horizontal pill on desktop */}
+      <div className={`absolute right-2 top-1/2 flex max-h-[92vh] -translate-y-1/2 flex-col items-center gap-1 overflow-y-auto rounded-full border border-white/10 bg-black/55 p-1.5 backdrop-blur-md transition-transform duration-300 md:bottom-6 md:left-1/2 md:right-auto md:top-auto md:max-h-none md:-translate-x-1/2 md:translate-y-0 md:flex-row md:overflow-visible md:pl-2 ${railOpen ? 'translate-x-0' : 'translate-x-[calc(100%+1rem)]'}`}>
+        {/* collapse toggle */}
+        <button
+          onClick={() => setRailOpen(false)}
+          title="Hide controls"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-cyan-300/70 transition-colors hover:bg-cyan-400/15 hover:text-cyan-300 md:hidden"
+        >
+          <ChevronRight size={18} />
+        </button>
         {/* play / pause */}
         <button
           onClick={togglePause}
           title={paused ? 'Resume' : 'Pause'}
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:h-8 md:w-8 ${
             paused
               ? 'bg-cyan-400 text-black shadow-[0_0_12px_rgba(34,211,238,0.5)]'
               : 'text-white/80 hover:bg-white/10'
           }`}
         >
-          {paused ? <Play size={15} className="ml-0.5" fill="currentColor" /> : <Pause size={15} fill="currentColor" />}
+          {paused ? <Play size={16} className="ml-0.5" fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
         </button>
 
-        <div className="mx-1 h-5 w-px bg-white/10" />
+        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
 
         {/* rate presets */}
         {RATES.map((r) => (
           <button
             key={r}
             onClick={() => applyRate(r)}
-            className={`rounded-full px-3 py-1 font-mono text-xs transition-colors ${
+            className={`rounded-full px-1.5 py-1 font-mono text-[11px] transition-colors md:px-3 md:py-1 md:text-xs ${
               !paused && rate === r ? 'bg-cyan-400/25 text-cyan-300' : 'text-white/55 hover:bg-white/10'
             }`}
           >
@@ -321,21 +347,21 @@ export default function Home() {
         <button
           onClick={resetTime}
           title="Reset to current time"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white md:h-8 md:w-8"
         >
           <RotateCcw size={14} />
         </button>
 
-        <div className="mx-1 h-5 w-px bg-white/10" />
+        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
 
         {/* camera auto-rotate */}
-        <div className="flex items-center gap-0.5 rounded-full bg-white/5 p-0.5" title="Camera auto-rotate">
-          <Orbit size={13} className="mx-1.5 text-white/40" />
+        <div className="flex flex-col items-center gap-1 rounded-full bg-white/5 p-0.5 md:flex-row" title="Camera auto-rotate">
+          <Orbit size={13} className="my-1 text-white/40 md:mx-1.5 md:my-0" />
           {SPINS.map((s) => (
             <button
               key={s.label}
               onClick={() => setSpin(s.value)}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide transition-colors ${
+              className={`rounded-full px-1.5 py-1 text-[9px] font-medium uppercase tracking-wide transition-colors md:px-2.5 md:py-1 md:text-[10px] ${
                 spin === s.value ? 'bg-cyan-400/25 text-cyan-300' : 'text-white/45 hover:bg-white/10'
               }`}
             >
@@ -344,13 +370,13 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mx-1 h-5 w-px bg-white/10" />
+        <div className="my-1 h-px w-5 bg-white/10 md:mx-1 md:my-0 md:h-5 md:w-px" />
 
         {/* starfield toggle */}
         <button
           onClick={() => setStarsVisible((v) => !v)}
           title={starsVisible ? 'Hide background stars' : 'Show background stars'}
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-8 md:w-8 ${
             starsVisible ? 'text-cyan-300 hover:bg-white/10' : 'text-white/40 hover:bg-white/10'
           }`}
         >
@@ -358,9 +384,21 @@ export default function Home() {
         </button>
       </div>
 
+      {/* edge tab to reopen the hidden rail (mobile only) */}
+      {!railOpen && (
+        <button
+          onClick={() => setRailOpen(true)}
+          title="Show controls"
+          aria-label="Show controls"
+          className="absolute right-0 top-1/2 flex h-20 w-10 -translate-y-1/2 items-center justify-center rounded-l-full border border-r-0 border-cyan-400/30 bg-black/60 text-cyan-300 backdrop-blur-md shadow-[0_0_14px_rgba(34,211,238,0.25)] transition-colors hover:bg-cyan-400/15 hover:text-cyan-200 md:hidden"
+        >
+          <ChevronLeft size={28} />
+        </button>
+      )}
+
       {/* selected satellite panel */}
       {selected && (
-        <div className="absolute bottom-24 right-5 w-72 rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-md">
+        <div className="absolute bottom-20 left-3 right-3 max-h-[42vh] w-auto overflow-y-auto rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-md md:bottom-24 md:left-auto md:right-5 md:max-h-none md:w-72 md:overflow-visible">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm font-semibold text-white/95">{selected.name}</div>
@@ -428,8 +466,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* hint */}
-      <div className="pointer-events-none absolute bottom-6 right-5 text-right text-[10px] uppercase tracking-widest text-white/25">
+      {/* hint (xl only — would collide with the centered control pill below that) */}
+      <div className="pointer-events-none absolute bottom-6 right-5 hidden text-right text-[10px] uppercase tracking-widest text-white/25 xl:block">
         drag · rotate&nbsp;&nbsp;scroll · zoom&nbsp;&nbsp;click · track
       </div>
 
